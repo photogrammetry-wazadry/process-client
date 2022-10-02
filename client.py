@@ -8,11 +8,7 @@ from glob import glob
 import requests
 from main import orbit_render, execute
 
-
-CLIENT_NAME = "dev"
-SERVER_URL = "http://127.0.0.1:1303"
-CAN_DO_IMAGES = "true"
-CAN_DO_MODELS = "false"
+from config import CLIENT_NAME, SERVER_URL, CAN_DO_IMAGES, CAN_DO_MODELS
 
 
 needed_dirs = ["input/", "render/", "temp/"]
