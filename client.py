@@ -15,6 +15,11 @@ CAN_DO_IMAGES = "true"
 CAN_DO_MODELS = "false"
 
 
+needed_dirs = ["input/", "render/", "temp/"]
+for needed_dir in needed_dirs:
+    if not os.path.exists(needed_dir):
+        os.mkdir(needed_dir)
+
 while True:
     print("Server free, sending request for new work")
 
