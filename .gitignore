@@ -127,3 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+input/
+render/
+temp/
+.idea
+
+*.blend1
+project.blend
+template.blend
