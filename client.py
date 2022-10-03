@@ -36,7 +36,10 @@ while True:
 
         for line in execute(["blender", "-b", "project.blend", "-o", f"{os.path.join(os.getcwd(), 'render')}/###",
                                         "-s", str(start_index), "-a"]):
-            print(line, end='')
+            try:
+                print(line, end='')
+            except:
+                pass
 
         shutil.make_archive("render", 'zip', "./render")
 
