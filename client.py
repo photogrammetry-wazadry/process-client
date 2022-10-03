@@ -1,14 +1,20 @@
-import sys
-# caution: path[0] is reserved for script path (or '' in REPL)
-sys.path.insert(1, 'blender-sphere-renderer')
-
 import os
 import shutil
 from glob import glob
 import requests
-from main import orbit_render, execute
+import subprocess
 
-from config import CLIENT_NAME, SERVER_URL, CAN_DO_IMAGES, CAN_DO_MODELS
+from config import CLIENT_NAME, SERVER_URL, CAN_DO_IMAGES, CAN_DO_MODELS, BLENDER_CALL_PATH
+
+
+def execute(cmd):
+    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
+    for stdout_line in iter(popen.stdout.readline, ""):
+        yield stdout_line
+    popen.stdout.close()
+    return_code = popen.wait()
+    if return_code:
+        raise subprocess.CalledProcessError(return_code, cmd)
 
 
 needed_dirs = ["input/", "render/", "temp/"]
@@ -25,21 +31,21 @@ while True:
     start_index = r.headers['start_index']
     task_type = r.headers['task_type']
 
-    open('input/model.zip', 'wb').write(r.content)
+    open('project.blend', 'wb').write(r.content)
 
     if task_type == "render":
         # Clear render directory
         for file in glob("render/*"):
             os.remove(file)
 
-        orbit_render("model.zip")  # Import and normalise size of the model
-
-        for line in execute(["blender", "-b", "project.blend", "-o", f"{os.path.join(os.getcwd(), 'render')}/###",
-                                        "-s", str(start_index), "-a"]):
+        for line in execute([str(BLENDER_CALL_PATH), "-b", "project.blend", "--python",
+                             os.path.join(os.getcwd(), 'find_gpu.py'), "-o",
+                             f"{os.path.join(os.getcwd(), 'render')}/###",
+                             "-s", str(start_index), "-a"]):
             try:
                 print(line, end='')
             except:
-                pass
+                print("Encoding error :\\")
 
         shutil.make_archive("render", 'zip', "./render")
 
