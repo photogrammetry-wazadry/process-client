@@ -9,8 +9,13 @@ from config import CLIENT_NAME, SERVER_URL, CAN_DO_IMAGES, CAN_DO_MODELS, BLENDE
 
 def execute(cmd):
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
-    for stdout_line in iter(popen.stdout.readline, ""):
-        yield stdout_line
+
+    try:
+        for stdout_line in iter(popen.stdout.readline, ""):
+            yield stdout_line
+    except:
+        pass
+
     popen.stdout.close()
     return_code = popen.wait()
     if return_code:
