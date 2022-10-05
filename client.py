@@ -3,6 +3,7 @@ import shutil
 from glob import glob
 import requests
 import subprocess
+import zipfile
 
 from config import CLIENT_NAME, SERVER_URL, CAN_DO_IMAGES, CAN_DO_MODELS, BLENDER_CALL_PATH
 
@@ -33,12 +34,13 @@ while True:
     r = requests.get(f"{SERVER_URL}/get_task/{CLIENT_NAME}/{CAN_DO_IMAGES}/{CAN_DO_MODELS}", allow_redirects=True)
 
     # Headers
-    start_index = r.headers['start_index']
+    print(r)
     task_type = r.headers['task_type']
 
-    open('project.blend', 'wb').write(r.content)
-
     if task_type == "render":
+        start_index = r.headers['start_index']
+        open('project.blend', 'wb').write(r.content)
+
         # Clear render directory
         for file in glob("render/*"):
             os.remove(file)
@@ -60,4 +62,25 @@ while True:
         os.remove("render.zip")
 
     else:
-        raise NotImplementedError
+        open('photos.zip', 'wb').write(r.content)
+        
+        output_dir = "metashape_api/render"
+        for file_name in glob(os.path.join(output_dir, "*.png")):
+            os.remove(file_name)
+
+        # Extract
+        with zipfile.ZipFile("photos.zip", 'r') as zip_ref:
+            zip_ref.extractall(output_dir)
+
+        print("Starting calc")
+        for line in execute(["metashape_api/metashape/metashape.sh", "-r", "metashape_api/load.py"]):
+            try:
+                print(line, end='')
+            except:
+                print("Encoding error :\\")
+
+        shutil.make_archive("model", 'zip', "./output")
+        files = {'file': open("model.zip", 'rb')}
+        values = {'client_name': CLIENT_NAME}
+        r = requests.post(f"{SERVER_URL}/submit_task/{CLIENT_NAME}/{task_type}", files=files, data=values)
+        os.remove("model.zip")

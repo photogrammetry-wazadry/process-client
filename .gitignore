@@ -134,6 +134,7 @@ render/
 temp/
 .idea
 
+photos.zip
 config.py
 *.blend1
 project.blend
