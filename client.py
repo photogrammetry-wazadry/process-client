@@ -4,8 +4,9 @@ from glob import glob
 import requests
 import subprocess
 import zipfile
+import time
 
-from config import CLIENT_NAME, SERVER_URL, CAN_DO_IMAGES, CAN_DO_MODELS, BLENDER_CALL_PATH
+from config import CLIENT_NAME, SERVER_URL, CAN_DO_IMAGES, CAN_DO_MODELS, BLENDER_CALL_PATH, METASHAPE_CALL_PATH
 
 
 def execute(cmd):
@@ -73,7 +74,7 @@ while True:
             zip_ref.extractall(output_dir)
 
         print("Starting calc")
-        for line in execute(["metashape_api/metashape/metashape.sh", "-r", "metashape_api/load.py"]):
+        for line in execute([METASHAPE_CALL_PATH, "-r", "metashape_api/load.py"]):
             try:
                 print(line, end='')
             except:
@@ -83,4 +84,6 @@ while True:
         files = {'file': open("model.zip", 'rb')}
         values = {'client_name': CLIENT_NAME}
         r = requests.post(f"{SERVER_URL}/submit_task/{CLIENT_NAME}/{task_type}", files=files, data=values)
+        
+        time.sleep(60)
         os.remove("model.zip")

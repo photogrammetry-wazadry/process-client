@@ -1,8 +1,5 @@
 import Metashape
 import os
-from glob import glob
-import shutil
-
 
 doc = Metashape.app.document
 # doc.open("template.psx")
@@ -27,14 +24,11 @@ chunk.buildModel(surface_type=Metashape.Arbitrary, interpolation=Metashape.Enabl
 
 # doc.save()
 
-shutil.rmtree("./output")
-os.mkdir("./output")
+chunk.exportModel(path="./metashape_api/output/export.obj", save_texture=False, format=Metashape.ModelFormatOBJ)
+chunk.exportModel(path="./metashape_api/output/export.gltf", save_texture=False, format=Metashape.ModelFormatGLTF)
+chunk.exportModel(path="./metashape_api/output/export.stl", save_texture=False, format=Metashape.ModelFormatSTL)
 
-doc.save(path = "./output/project.psx", chunks=[doc.chunk])
-
-chunk.exportModel(path="./output/export.obj", save_texture=False, format=Metashape.ModelFormatOBJ)
-chunk.exportModel(path="./output/export.gltf", save_texture=False, format=Metashape.ModelFormatGLTF)
-chunk.exportModel(path="./output/export.stl", save_texture=False, format=Metashape.ModelFormatSTL)
+doc.save(path = "./metashape_api/output/project.psx", chunks=[doc.chunk])
 
 # chunk.buildUV(mapping_mode=Metashape.GenericMapping)
 # chunk.buildTexture(blending_mode=Metashape.MosaicBlending, texture_size=4096)
