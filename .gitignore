@@ -131,6 +131,7 @@ dmypy.json
 # Custom
 input/
 render/
+output/
 temp/
 .idea
 

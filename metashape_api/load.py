@@ -27,7 +27,8 @@ chunk.buildModel(surface_type=Metashape.Arbitrary, interpolation=Metashape.Enabl
 
 # doc.save()
 
-shutil.rmtree("./output")
+if os.path.exists("./output"):
+    shutil.rmtree("./output")
 os.mkdir("./output")
 
 doc.save(path = "./output/project.psx", chunks=[doc.chunk])
