@@ -63,6 +63,9 @@ while True:
         os.remove("render.zip")
 
     else:
+        if os.path.exists("model.zip"):
+            os.remove("model.zip")
+
         open('photos.zip', 'wb').write(r.content)
         
         output_dir = "metashape_api/render"
@@ -86,4 +89,3 @@ while True:
         r = requests.post(f"{SERVER_URL}/submit_task/{CLIENT_NAME}/{task_type}", files=files, data=values)
         
         time.sleep(60)
-        os.remove("model.zip")
