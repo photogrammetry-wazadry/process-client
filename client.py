@@ -9,8 +9,11 @@ import time
 from config import CLIENT_NAME, SERVER_URL, CAN_DO_IMAGES, CAN_DO_MODELS, BLENDER_CALL_PATH, METASHAPE_CALL_PATH
 
 
+env = os.environ.copy()
+env["DISPLAY"] = ":0"
+
 def execute(cmd):
-    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
+    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, env=env, universal_newlines=True)
 
     try:
         for stdout_line in iter(popen.stdout.readline, ""):
@@ -30,7 +33,7 @@ for needed_dir in needed_dirs:
         os.mkdir(needed_dir)
 
 while True:
-    print("Server free, sending request for new work")
+    print("\nServer free, sending request for new work")
 
     r = requests.get(f"{SERVER_URL}/get_task/{CLIENT_NAME}/{CAN_DO_IMAGES}/{CAN_DO_MODELS}", allow_redirects=True)
 
@@ -39,24 +42,24 @@ while True:
     task_type = r.headers['task_type']
 
     if task_type == "render":
-        start_index = r.headers['start_index']
         open('project.blend', 'wb').write(r.content)
 
         # Clear render directory
         for file in glob("render/*"):
             os.remove(file)
 
-        for line in execute([str(BLENDER_CALL_PATH), "-b", "project.blend", "--python",
-                             os.path.join(os.getcwd(), 'find_gpu.py'), "-o",
+        for line in execute([str(BLENDER_CALL_PATH), "-b", "-E", "BLENDER_EEVEE", "project.blend", "-o",
                              f"{os.path.join(os.getcwd(), 'render')}/###",
-                             "-s", str(start_index), "-a"]):
+                             "-s", str(1), "-a"]):
             try:
                 print(line, end='')
             except:
                 print("Encoding error :\\")
 
+        print("Rendering finished, archiving images")
         shutil.make_archive("render", 'zip', "./render")
 
+        print("Sending results to main server now")
         files = {'file': open("render.zip", 'rb')}
         values = {'client_name': CLIENT_NAME}
         r = requests.post(f"{SERVER_URL}/submit_task/{CLIENT_NAME}/{task_type}", files=files, data=values)
